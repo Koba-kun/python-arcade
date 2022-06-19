@@ -1,6 +1,6 @@
 # python-arcade
 A simple game built with Python and the Arcade library.
-
+This is going to be my first python game.
 
 # Setup virtual environment
 
