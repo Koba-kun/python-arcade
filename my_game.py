@@ -19,6 +19,7 @@ SCREEN_HEIGHT = 600
 # Variables controlling the player
 PLAYER_LIVES = 3
 PLAYER_SPEED_X = 5
+PLAYER_SPEED_Y = 5
 PLAYER_START_X = SCREEN_WIDTH / 2
 PLAYER_START_Y = 50
 PLAYER_SHOT_SPEED = 4
@@ -52,12 +53,18 @@ class Player(arcade.Sprite):
 
         # Update center_x
         self.center_x += self.change_x
+        # Update center_y
+        self.center_y += self.change_y
 
         # Don't let the player move off screen
         if self.left < 0:
             self.left = 0
         elif self.right > SCREEN_WIDTH - 1:
             self.right = SCREEN_WIDTH - 1
+        if self.center_y < 0:
+            self.center_y = 0
+        elif self.center_y > SCREEN_HEIGHT - 1:
+            self.center_y = SCREEN_HEIGHT - 1
 
 
 class PlayerShot(arcade.Sprite):
@@ -191,12 +198,17 @@ class MyGame(arcade.Window):
 
         # Calculate player speed based on the keys pressed
         self.player_sprite.change_x = 0
+        self.player_sprite.change_y = 0
 
         # Move player with keyboard
         if self.left_pressed and not self.right_pressed:
             self.player_sprite.change_x = -PLAYER_SPEED_X
         elif self.right_pressed and not self.left_pressed:
             self.player_sprite.change_x = PLAYER_SPEED_X
+        if self.up_pressed and not self.down_pressed:
+            self.player_sprite.change_y = PLAYER_SPEED_Y
+        elif self.down_pressed and not self.up_pressed:
+            self.player_sprite.change_y = -PLAYER_SPEED_Y
 
         # Move player with joystick if present
         if self.joystick:
@@ -224,6 +236,7 @@ class MyGame(arcade.Window):
             self.right_pressed = True
 
         if key == FIRE_KEY:
+            self.player_score += 100
             new_shot = PlayerShot(
                 self.player_sprite.center_x,
                 self.player_sprite.center_y
