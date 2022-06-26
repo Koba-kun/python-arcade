@@ -61,10 +61,10 @@ class Player(arcade.Sprite):
             self.left = 0
         elif self.right > SCREEN_WIDTH - 1:
             self.right = SCREEN_WIDTH - 1
-        if self.center_y < 0:
-            self.center_y = 0
-        elif self.center_y > SCREEN_HEIGHT - 1:
-            self.center_y = SCREEN_HEIGHT - 1
+        if self.bottom < 0:
+            self.bottom = 0
+        elif self.top > SCREEN_HEIGHT - 1:
+            self.top = SCREEN_HEIGHT - 1
 
 
 class PlayerShot(arcade.Sprite):
@@ -95,7 +95,12 @@ class PlayerShot(arcade.Sprite):
         # Remove shot when over top of screen
         if self.bottom > SCREEN_HEIGHT:
             self.kill()
-
+class Enemy(arcade.Sprite):
+    def __init__(self):
+        super().__init__("images/Enemies/enemyBlue1.png", SPRITE_SCALING)
+        self.center_x = SCREEN_WIDTH / 2
+        self.center_y = SCREEN_HEIGHT / 2
+        self.score_amount = 100
 
 class MyGame(arcade.Window):
     """
@@ -112,6 +117,9 @@ class MyGame(arcade.Window):
 
         # Variable that will hold a list of shots fired by the player
         self.player_shot_list = None
+
+        # List of enemies
+        self.enemy_list = None
 
         # Set up the player info
         self.player_sprite = None
@@ -162,12 +170,15 @@ class MyGame(arcade.Window):
 
         # Sprite lists
         self.player_shot_list = arcade.SpriteList()
+        self.enemy_list = arcade.SpriteList()
 
         # Create a Player object
         self.player_sprite = Player(
             center_x=PLAYER_START_X,
             center_y=PLAYER_START_Y
         )
+
+        self.enemy_list.append(Enemy())
 
     def on_draw(self):
         """
@@ -179,6 +190,9 @@ class MyGame(arcade.Window):
 
         # Draw the player shot
         self.player_shot_list.draw()
+
+        # Draw the enemy
+        self.enemy_list.draw()
 
         # Draw the player sprite
         self.player_sprite.draw()
@@ -214,6 +228,13 @@ class MyGame(arcade.Window):
         if self.joystick:
             self.player_sprite.change_x = round(self.joystick.x) * PLAYER_SPEED_X
 
+        for shot in self.player_shot_list:
+            for enemy in arcade.check_for_collision_with_list(shot, self.enemy_list):
+                self.player_score += enemy.score_amount
+                enemy.kill()
+                shot.kill()
+
+
         # Update player sprite
         self.player_sprite.update()
 
@@ -236,7 +257,6 @@ class MyGame(arcade.Window):
             self.right_pressed = True
 
         if key == FIRE_KEY:
-            self.player_score += 100
             new_shot = PlayerShot(
                 self.player_sprite.center_x,
                 self.player_sprite.center_y
