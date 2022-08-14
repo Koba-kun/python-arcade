@@ -24,6 +24,10 @@ PLAYER_START_X = SCREEN_WIDTH / 2
 PLAYER_START_Y = 50
 PLAYER_SHOT_SPEED = 4
 
+ENEMY_MIN_X  = 50
+ENEMY_MAX_X = SCREEN_WIDTH - ENEMY_MIN_X
+ENEMY_SPEED = 1
+
 FIRE_KEY = arcade.key.SPACE
 
 class Player(arcade.Sprite):
@@ -98,8 +102,8 @@ class PlayerShot(arcade.Sprite):
 class Enemy(arcade.Sprite):
     def __init__(self):
         super().__init__("images/Enemies/enemyBlue1.png", SPRITE_SCALING)
-        self.center_x = SCREEN_WIDTH / 2
-        self.center_y = SCREEN_HEIGHT / 2
+        #self.center_x = SCREEN_WIDTH / 2
+        #self.center_y = SCREEN_HEIGHT / 2
         self.score_amount = 100
 
 class MyGame(arcade.Window):
@@ -120,6 +124,8 @@ class MyGame(arcade.Window):
 
         # List of enemies
         self.enemy_list = None
+
+        self.enemy_direction = None
 
         # Set up the player info
         self.player_sprite = None
@@ -172,13 +178,20 @@ class MyGame(arcade.Window):
         self.player_shot_list = arcade.SpriteList()
         self.enemy_list = arcade.SpriteList()
 
+        # -1 = left, 1 = right
+        self.enemy_direction = -1
+
         # Create a Player object
         self.player_sprite = Player(
             center_x=PLAYER_START_X,
             center_y=PLAYER_START_Y
         )
 
-        self.enemy_list.append(Enemy())
+        for i in range(5):
+            e = Enemy()
+            e.center_x = 100 + i * 100
+            e.center_y = SCREEN_HEIGHT - 100
+            self.enemy_list.append(e)
 
     def on_draw(self):
         """
@@ -240,6 +253,26 @@ class MyGame(arcade.Window):
 
         # Update the player shots
         self.player_shot_list.update()
+
+        # Checks if the enemy is out of bounds
+        enemies_moving_down = False
+        for enemy in self.enemy_list:
+            if enemy.center_x <= ENEMY_MIN_X and self.enemy_direction == -1 or enemy.center_x >= ENEMY_MAX_X and self.enemy_direction == 1:
+                enemies_moving_down = True
+                break
+
+        # Moves the enemies
+        for enemy in self.enemy_list:
+            if enemies_moving_down:
+                enemy.center_y -= 2
+                self.enemy_direction *= -1
+            else:
+                enemy.center_x += ENEMY_SPEED * self.enemy_direction
+
+        # End the game if the enemies are killed
+        if len(self.enemy_list) == 0:
+            exit(0)
+
 
     def on_key_press(self, key, modifiers):
         """
