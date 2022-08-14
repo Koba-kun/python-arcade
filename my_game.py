@@ -24,9 +24,13 @@ PLAYER_START_X = SCREEN_WIDTH / 2
 PLAYER_START_Y = 50
 PLAYER_SHOT_SPEED = 4
 
-ENEMY_MIN_X  = 50
+# Where enemies change direction and moves down
+ENEMY_MIN_X = 50
 ENEMY_MAX_X = SCREEN_WIDTH - ENEMY_MIN_X
+
 ENEMY_SPEED = 1
+# How far the enemy falls
+ENEMY_DROP = 50
 
 FIRE_KEY = arcade.key.SPACE
 
@@ -264,14 +268,20 @@ class MyGame(arcade.Window):
         # Moves the enemies
         for enemy in self.enemy_list:
             if enemies_moving_down:
-                enemy.center_y -= 2
+                enemy.center_y -= ENEMY_DROP
                 self.enemy_direction *= -1
             else:
                 enemy.center_x += ENEMY_SPEED * self.enemy_direction
 
         # End the game if the enemies are killed
         if len(self.enemy_list) == 0:
+            print("player won")
             exit(0)
+
+        for enemy in self.enemy_list:
+            if enemy.center_y <= self.player_sprite.center_y:
+                print("enemies won")
+                exit(1)
 
 
     def on_key_press(self, key, modifiers):
