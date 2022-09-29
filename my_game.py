@@ -263,13 +263,13 @@ class MyGame(arcade.Window):
         for enemy in self.enemy_list:
             if enemy.center_x <= ENEMY_MIN_X and self.enemy_direction == -1 or enemy.center_x >= ENEMY_MAX_X and self.enemy_direction == 1:
                 enemies_moving_down = True
+                self.enemy_direction *= -1
                 break
 
         # Moves the enemies
         for enemy in self.enemy_list:
             if enemies_moving_down:
                 enemy.center_y -= ENEMY_DROP
-                self.enemy_direction *= -1
             else:
                 enemy.center_x += ENEMY_SPEED * self.enemy_direction
 
